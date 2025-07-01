@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Batalha Naval - Interface</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #0a2239;
+    color: #e0e0e0;
+    text-align: center;
+    margin: 20px;
+  }
+  table {
+    margin: 0 auto;
+    border-collapse: collapse;
+  }
+  td {
+    width: 40px;
+    height: 40px;
+    border: 2px solid #1f6f8b;
+    font-size: 24px;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    user-select: none;
+  }
+  td.agua {
+    background-color: #145374;
+    color: #a7c7e7;
+  }
+  td.navio {
+    background-color: #a83232;
+    color: #fff;
+  }
+  td.erro {
+    background-color: #cfcfcf;
+    color: #333;
+  }
+  td.acerto {
+    background-color: #2e8b57;
+    color: #fff;
+  }
+  input[type="number"] {
+    width: 40px;
+    padding: 5px;
+    font-size: 18px;
+    text-align: center;
+  }
+  button {
+    padding: 8px 16px;
+    margin-left: 10px;
+    font-size: 18px;
+    background-color: #1f6f8b;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #145374;
+  }
+  #mensagem {
+    margin-top: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+
+<h1>Batalha Naval</h1>
+
+<table id="tabuleiro">
+  <!-- As células serão geradas por JavaScript -->
+</table>
+
+<div style="margin-top: 20px;">
+  <label>Linha (0-7): <input type="number" id="linha" min="0" max="7"></label>
+  <label>Coluna (0-7): <input type="number" id="coluna" min="0" max="7"></label>
+  <button onclick="atacar()">Atacar</button>
+</div>
+
+<div id="mensagem"></div>
+
+<script>
+  const tamanho = 8;
+  const tabuleiro = [];
+  const navios = [];
+
+  // Inicializa tabuleiro e navios
+  for(let i=0; i<tamanho; i++){
+    tabuleiro[i] = [];
+    navios[i] = [];
+    for(let j=0; j<tamanho; j++){
+      tabuleiro[i][j] = '~';  // água
+      navios[i][j] = false;   // sem navio
+    }
+  }
+
+  // Posiciona 10 navios aleatoriamente
+  let naviosPosicionados = 0;
+  while(naviosPosicionados < 10){
+    let l = Math.floor(Math.random() * tamanho);
+    let c = Math.floor(Math.random() * tamanho);
+    if(!navios[l][c]){
+      navios[l][c] = true;
+      naviosPosicionados++;
+    }
+  }
+
+  // Gera a tabela na tela
+  function criarTabuleiro(){
+    const tabela = document.getElementById('tabuleiro');
+    tabela.innerHTML = '';
+    for(let i=0; i<tamanho; i++){
+      const linha = document.createElement('tr');
+      for(let j=0; j<tamanho; j++){
+        const celula = document.createElement('td');
+        celula.id = `celula-${i}-${j}`;
+        celula.textContent = tabuleiro[i][j];
+        celula.className = 'agua';
+        linha.appendChild(celula);
+      }
+      tabela.appendChild(linha);
+    }
+  }
+
+  criarTabuleiro();
+
+  // Função para processar o ataque
+  function atacar(){
+    const l = parseInt(document.getElementById('linha').value);
+    const c = parseInt(document.getElementById('coluna').value);
+    const mensagem = document.getElementById('mensagem');
+
+    if(isNaN(l) || isNaN(c) || l < 0 || l >= tamanho || c < 0 || c >= tamanho){
+      mensagem.textContent = 'Coordenadas inválidas! Use valores entre 0 e 7.';
+      return;
+    }
+
+    if(tabuleiro[l][c] === 'A' || tabuleiro[l][c] === 'X'){
+      mensagem.textContent = 'Você já atirou nessa posição!';
+      return;
+    }
+
+    if(navios[l][c]){
+      tabuleiro[l][c] = 'A'; // Acertou navio
+      mensagem.textContent = 'Você acertou um navio!';
+      document.getElementById(`celula-${l}-${c}`).className = 'acerto';
+    } else {
+      tabuleiro[l][c] = 'X'; // Errou
+      mensagem.textContent = 'Você errou!';
+      document.getElementById(`celula-${l}-${c}`).className = 'erro';
+    }
+
+    document.getElementById(`celula-${l}-${c}`).textContent = tabuleiro[l][c];
+  }
+</script>
+
+</body>
+</html>
